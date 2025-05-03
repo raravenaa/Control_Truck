@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 
+from Conductores import mostrar_conductores
 from login import mostrar_login, mostrar_logout
 from ingreso import mostrar_ingreso
 from visualizacion import mostrar_visualizacion
@@ -22,8 +23,8 @@ mostrar_logout()
 with st.sidebar:
     menu = option_menu(
         menu_title="Menú Principal",
-        options=["Ingreso", "Visualización", "Camioneros", "Resumen"],
-        icons=["plus-circle", "card-list", "truck", "bar-chart"],
+        options=["Ingreso", "Visualización", "Conductores","Rutas", "Resumen"],
+        icons=["plus-circle", "card-list", "truck","map", "bar-chart"],
         menu_icon="cast",
         default_index=0,
         styles={
@@ -46,7 +47,7 @@ if menu == "Ingreso":
     mostrar_ingreso()
 elif menu == "Visualización":
     mostrar_visualizacion()
-#elif menu == "Camioneros":
-#    mostrar_camioneros(empresa_id)
+elif menu == "Conductores":
+    mostrar_conductores()
 #elif menu == "Resumen":
 #    mostrar_resumen(empresa_id)
