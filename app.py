@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 from Conductores import mostrar_conductores
+from destinos import mostrar_destinos
 from login import mostrar_login, mostrar_logout
 from ingreso import mostrar_ingreso
 from visualizacion import mostrar_visualizacion
@@ -49,5 +50,7 @@ elif menu == "Visualización":
     mostrar_visualizacion()
 elif menu == "Conductores":
     mostrar_conductores()
+elif menu == "Rutas":
+    mostrar_destinos()
 #elif menu == "Resumen":
 #    mostrar_resumen(empresa_id)
