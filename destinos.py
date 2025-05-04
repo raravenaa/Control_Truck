@@ -3,10 +3,12 @@ import pandas as pd
 from db import (
     obtener_destinos_completos,
     obtener_conductores_por_empresa,
-    #crear_destino,
+    crear_destino,
     actualizar_destino,
     # deshabilitar_destino
 )
+from utils import formato_clp
+
 
 def mostrar_destinos():
     st.header("📍 Gestión de Destinos o Rutas")
@@ -32,6 +34,10 @@ def mostrar_destinos():
         "valor_total": "Valor Total",
         "activo": "Activo"
     }, inplace=True)
+
+    # Formato CLP
+    for campo in ["Gasto Conductor", "Gasto Petróleo", "Valor Total"]:
+        df_original[campo] = df_original[campo].apply(formato_clp)
 
     st.subheader("📋 Lista de Destinos")
     edited_df = st.data_editor(
@@ -59,13 +65,19 @@ def mostrar_destinos():
             st.rerun()
 
     st.markdown("---")
+    # Si se acaba de enviar un formulario, limpiamos el estado
+    if st.session_state.get("form_submitted"):
+        del st.session_state["form_submitted"]
+        st.rerun()
+
     with st.expander("➕ Agregar nuevo destino"):
         with st.form("form_nuevo_destino"):
-            nombre = st.text_input("Nombre", key="nuevo_nombre")
-            gasto_conductor = st.number_input("Gasto Conductor", min_value=0, key="nuevo_gc")
-            gasto_petroleo = st.number_input("Gasto Petróleo", min_value=0, key="nuevo_gp")
-            valor_total = st.number_input("Valor Total", min_value=0, key="nuevo_vt")
-            conductor_id = st.selectbox("Conductor", options=list(conductores_dict.keys()), format_func=lambda x: conductores_dict[x], key="nuevo_conductor")
+            nombre = st.text_input("Nombre")
+            gasto_conductor = st.number_input("Gasto Conductor", min_value=0)
+            gasto_petroleo = st.number_input("Gasto Petróleo", min_value=0)
+            valor_total = st.number_input("Valor Total", min_value=0)
+            conductor_id = st.selectbox("Conductor", options=list(conductores_dict.keys()),
+                                        format_func=lambda x: conductores_dict[x])
             submitted = st.form_submit_button("Agregar")
 
             if submitted:
@@ -74,6 +86,6 @@ def mostrar_destinos():
                 else:
                     crear_destino(nombre, gasto_conductor, gasto_petroleo, valor_total, conductor_id, empresa_id)
                     st.success("✅ Destino agregado correctamente.")
-                    for campo in ["nuevo_nombre", "nuevo_gc", "nuevo_gp", "nuevo_vt"]:
-                        st.session_state[campo] = 0 if isinstance(st.session_state[campo], (int, float)) else ""
+                    st.session_state["form_submitted"] = True
                     st.rerun()
+

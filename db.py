@@ -32,12 +32,12 @@ def obtener_conductores_por_empresa(empresa_id):
             ORDER BY nombre
         """, (empresa_id,)).fetchall()
 
-def agregar_conductor(empresa_id, nombre, apellidos, rut, tipo_licencia, telefono, correo):
+def agregar_conductor(empresa_id, nombre, apellidos, rut, tipo_licencia, telefono, correo, sueldo_base):
     with conexion() as conn:
         conn.execute("""
-            INSERT INTO conductores (empresa_id, nombre, apellidos, rut, tipo_licencia, telefono, correo, activo)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-        """, (empresa_id, nombre, apellidos, rut, tipo_licencia, telefono, correo))
+            INSERT INTO conductores (empresa_id, nombre, apellidos, rut, tipo_licencia, telefono, correo,sueldo_base, activo)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+        """, (empresa_id, nombre, apellidos, rut, tipo_licencia, telefono, correo, sueldo_base))
         conn.commit()
 
 def actualizar_conductor(id, nombre, apellidos, rut, tipo_licencia, telefono, correo, sueldo_base, activo):
@@ -102,6 +102,14 @@ def cambiar_estado_destino(destino_id, nuevo_estado):
         """, (int(nuevo_estado), destino_id))
         conn.commit()
 
+def crear_destino(nombre, gasto_conductor, gasto_petroleo, valor_total, conductor_id, empresa_id):
+    with conexion() as conn:
+        conn.execute("""
+            INSERT INTO destinos (nombre, gasto_conductor, gasto_petroleo, valor_total, conductor, empresa, activo)
+            VALUES (?, ?, ?, ?, ?, ?, 1)
+        """, (nombre, gasto_conductor, gasto_petroleo, valor_total, conductor_id, empresa_id))
+
+
 
 # === REGISTROS ===
 def insertar_registro(data):
@@ -119,13 +127,14 @@ def obtener_registros_por_empresa(empresa_id):
         return conn.execute("""
             SELECT
                 r.id, r.fecha, r.numero_control, r.numero_guia, r.destino,
-                r.gasto_conductor, r.gasto_petroleo, r.valor_total,
+                r.gasto_conductor, r.gasto_petroleo, r.valor_total,c.nombre as conductor,
                 e.nombre AS estado
             FROM registros r
             JOIN estados e ON r.id_estado = e.id
+            join conductores c ON r.conductor = c.id
             WHERE r.empresa_id = ?
             ORDER BY r.fecha DESC
-        """, (empresa_id,)).fetchall()
+        """,(empresa_id,)).fetchall()
 
 def existe_numero_control(numero_control, empresa_id):
     with conexion() as conn:
@@ -135,3 +144,37 @@ def existe_numero_control(numero_control, empresa_id):
             LIMIT 1
         """, (numero_control, empresa_id))
         return cursor.fetchone() is not None
+
+def obtener_registros_rutas(empresa_id, fecha_inicio=None, fecha_fin=None):
+    with conexion() as conn:
+        if fecha_inicio and fecha_fin:
+            return conn.execute("""
+                SELECT
+                    r.id, r.fecha AS fecha,
+                    r.destino AS destino,
+                    r.gasto_conductor, r.gasto_petroleo, r.valor_total,
+                    c.id AS conductor_id,
+                    c.nombre AS nombre_conductor,
+                    c.rut,
+                    c.sueldo_base
+                FROM registros r
+                JOIN conductores c ON r.conductor = c.id
+                WHERE r.empresa_id = ?
+                  AND r.fecha BETWEEN ? AND ?
+                ORDER BY r.fecha DESC
+            """, (empresa_id, fecha_inicio, fecha_fin)).fetchall()
+        else:
+            return conn.execute("""
+                SELECT
+                    r.id, r.fecha AS fecha,
+                    r.destino AS destino,
+                    r.gasto_conductor, r.gasto_petroleo, r.valor_total,
+                    c.id AS conductor,
+                    c.nombre AS nombre_conductor,
+                    c.rut,
+                    c.sueldo_base
+                FROM registros r
+                JOIN conductores c ON r.conductor = c.id
+                WHERE r.empresa_id = ?
+                ORDER BY r.fecha DESC
+            """, (empresa_id,)).fetchall()

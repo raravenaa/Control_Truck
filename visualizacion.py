@@ -14,9 +14,10 @@ def mostrar_visualizacion():
     estado_filtro = st.selectbox("Filtrar por estado", ["Todos"] + estado_nombres)
     filtro_control = st.text_input("🔎 Buscar por N° de Control")
 
-    registros = obtener_registros_por_empresa(st.session_state["empresa_id"])
+    empresa_id = st.session_state["empresa_id"]
+    registros = obtener_registros_por_empresa(empresa_id)
     df = pd.DataFrame(registros, columns=[
-        "ID", "Fecha", "N° Control", "N° Guía", "Destino",
+        "ID", "Fecha", "N° Control", "N° Guía", "Destino","conductor",
         "Gasto Conductor", "Gasto Petróleo", "Valor Total", "Estado"
     ])
 

@@ -5,6 +5,7 @@ from Conductores import mostrar_conductores
 from destinos import mostrar_destinos
 from login import mostrar_login, mostrar_logout
 from ingreso import mostrar_ingreso
+from resumen import resumen_por_conductor
 from visualizacion import mostrar_visualizacion
 # from camioneros import mostrar_camioneros
 # from resumen import mostrar_resumen
@@ -52,5 +53,5 @@ elif menu == "Conductores":
     mostrar_conductores()
 elif menu == "Rutas":
     mostrar_destinos()
-#elif menu == "Resumen":
-#    mostrar_resumen(empresa_id)
+elif menu == "Resumen":
+    resumen_por_conductor()
