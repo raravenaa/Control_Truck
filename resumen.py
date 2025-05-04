@@ -102,6 +102,47 @@ def resumen_por_conductor():
 
     st.dataframe(resumen_df, use_container_width=True, hide_index=True, height=400)
 
+    # Agrupamos por conductor
+    df_conductores = df.groupby("nombre_conductor").agg({
+        "valor_total": "sum",
+        "gasto_conductor": "sum",
+        "gasto_petroleo": "sum"
+    }).reset_index()
+
+    df_conductores["utilidad"] = df_conductores["valor_total"] - (
+            df_conductores["gasto_conductor"] + df_conductores["gasto_petroleo"]
+    )
+
+    fig_bar = go.Figure()
+    fig_bar.add_trace(go.Bar(
+        x=df_conductores["nombre_conductor"],
+        y=df_conductores["valor_total"],
+        name="Ingresos",
+        marker_color="green"
+    ))
+    fig_bar.add_trace(go.Bar(
+        x=df_conductores["nombre_conductor"],
+        y=df_conductores["gasto_conductor"] + df_conductores["gasto_petroleo"],
+        name="Gastos",
+        marker_color="red"
+    ))
+    fig_bar.add_trace(go.Bar(
+        x=df_conductores["nombre_conductor"],
+        y=df_conductores["utilidad"],
+        name="Utilidad",
+        marker_color="blue"
+    ))
+
+    fig_bar.update_layout(
+        barmode="group",
+        title="Resumen por Conductor (Ingresos vs Gastos vs Utilidad)",
+        xaxis_title="Conductor",
+        yaxis_title="CLP",
+        legend_title="Categoría",
+    )
+
+    st.plotly_chart(fig_bar, use_container_width=True)
+
 def resumen_general():
     st.subheader("📅 Resumen General del Mes")
 
@@ -149,43 +190,4 @@ def resumen_general():
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Agrupamos por conductor
-    df_conductores = df.groupby("nombre_conductor").agg({
-        "valor_total": "sum",
-        "gasto_conductor": "sum",
-        "gasto_petroleo": "sum"
-    }).reset_index()
 
-    df_conductores["utilidad"] = df_conductores["valor_total"] - (
-            df_conductores["gasto_conductor"] + df_conductores["gasto_petroleo"]
-    )
-
-    fig_bar = go.Figure()
-    fig_bar.add_trace(go.Bar(
-        x=df_conductores["nombre_conductor"],
-        y=df_conductores["valor_total"],
-        name="Ingresos",
-        marker_color="green"
-    ))
-    fig_bar.add_trace(go.Bar(
-        x=df_conductores["nombre_conductor"],
-        y=df_conductores["gasto_conductor"] + df_conductores["gasto_petroleo"],
-        name="Gastos",
-        marker_color="red"
-    ))
-    fig_bar.add_trace(go.Bar(
-        x=df_conductores["nombre_conductor"],
-        y=df_conductores["utilidad"],
-        name="Utilidad",
-        marker_color="blue"
-    ))
-
-    fig_bar.update_layout(
-        barmode="group",
-        title="Resumen por Conductor (Ingresos vs Gastos vs Utilidad)",
-        xaxis_title="Conductor",
-        yaxis_title="CLP",
-        legend_title="Categoría",
-    )
-
-    st.plotly_chart(fig_bar, use_container_width=True)
