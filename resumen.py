@@ -7,7 +7,6 @@ from db import obtener_registros_rutas, obtener_conductores_por_empresa
 
 def calcular_quincena_actual():
     hoy = datetime.today()
-    inicio, fin = None, None
     if hoy.day <= 15:
         inicio = hoy.replace(day=1)
         fin = hoy.replace(day=15)
@@ -15,6 +14,31 @@ def calcular_quincena_actual():
         inicio = hoy.replace(day=16)
         fin = (hoy + relativedelta(months=1)).replace(day=1) - timedelta(days=1)
     return inicio.date(), fin.date()
+
+
+def parsear_clp(valor):
+    """
+    Convierte un string con formato CLP como '$650.000' en un float: 650000.0
+    """
+    if not valor:
+        return 0.0
+    if isinstance(valor, str):
+        try:
+            return float(valor.replace("$", "").replace(".", "").replace(",", "").strip())
+        except ValueError:
+            return 0.0
+    return float(valor)
+
+
+def formatear_clp(valor):
+    """
+    Convierte un número a formato CLP: 650000 -> $650.000
+    """
+    try:
+        valor = float(valor)
+        return "${:,.0f}".format(valor).replace(",", ".")
+    except:
+        return "$0"
 
 
 def resumen_por_conductor():
@@ -43,7 +67,6 @@ def resumen_por_conductor():
         "conductor_id", "nombre_conductor", "rut", "sueldo_base"
     ])
 
-
     if df.empty:
         st.info("No hay registros en este rango de fechas.")
         return
@@ -55,28 +78,16 @@ def resumen_por_conductor():
         gasto_conductor = data["gasto_conductor"].sum()
         total_rutas = len(data)
 
-
-
-        def parsear_clp(sueldo_base):
-            """
-            Convierte un string con formato CLP como '$650.000' en un float: 650000.0
-            """
-            if not sueldo_base:
-                return 0.0
-            if isinstance(sueldo_base, str):
-                try:
-                    return float(sueldo_base.replace("$", "").replace(".", "").replace(",", "").strip())
-                except ValueError:
-                    return 0.0
-            return float(sueldo_base)
-        total_a_pagar = parsear_clp(sueldo_base) + parsear_clp(gasto_conductor)
+        sueldo_base_float = parsear_clp(sueldo_base)
+        gasto_conductor_float = parsear_clp(gasto_conductor)
+        total_a_pagar = sueldo_base_float + gasto_conductor_float
 
         resumen.append({
             "Conductor": nombre,
-            "Sueldo Base": sueldo_base,
+            "Sueldo Base": formatear_clp(sueldo_base_float),
             "Rutas Realizadas": total_rutas,
-            "Total Rutas CLP": gasto_conductor,
-            "Total a Pagar": total_a_pagar
+            "Total Rutas CLP": formatear_clp(gasto_conductor_float),
+            "Total a Pagar": formatear_clp(total_a_pagar)
         })
 
     resumen_df = pd.DataFrame(resumen)
