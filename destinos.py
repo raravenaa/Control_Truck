@@ -36,7 +36,7 @@ def mostrar_destinos():
     st.subheader("📋 Lista de Destinos")
     edited_df = st.data_editor(
         df_original,
-        disabled=["ID","Conductor"],
+        disabled=["ID","Nombre","Conductor"],
         use_container_width=True,
         hide_index=True,
         num_rows="fixed"
@@ -46,18 +46,14 @@ def mostrar_destinos():
     for idx, row in edited_df.iterrows():
         original_row = df_original.loc[idx]
         if not row.equals(original_row):
-            conductor_id = next((id for id, nombre in conductores_dict.items() if nombre == row["Conductor"]), None)
-            if conductor_id is None:
-                st.warning(f"⚠️ El conductor asignado ya no existe para el destino '{row['Nombre']}'.")
-                continue
-
             actualizar_destino(
                 id=row["ID"],
                 nombre=row["Nombre"],
+                conductor=row["Conductor"],
                 gasto_conductor=row["Gasto Conductor"],
                 gasto_petroleo=row["Gasto Petróleo"],
                 valor_total=row["Valor Total"],
-                conductor_id=conductor_id
+                activo=row["Activo"]
             )
             st.success(f"✅ Destino '{row['Nombre']}' actualizado correctamente.")
             st.rerun()

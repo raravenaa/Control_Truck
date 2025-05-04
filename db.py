@@ -84,13 +84,13 @@ def guardar_destino(nombre, conductor_id, gasto_conductor, gasto_petroleo, valor
         """, (nombre, conductor_id, gasto_conductor, gasto_petroleo, valor_total))
         conn.commit()
 
-def actualizar_destino(destino_id, nombre, conductor_id, gasto_conductor, gasto_petroleo, valor_total):
+def actualizar_destino(id, nombre, conductor, gasto_conductor, gasto_petroleo, valor_total, activo):
     with conexion() as conn:
         conn.execute("""
             UPDATE destinos
-            SET nombre = ?, conductor = ?, gasto_conductor = ?, gasto_petroleo = ?, valor_total = ?
+            SET nombre = ?, conductor = ?, gasto_conductor = ?, gasto_petroleo = ?, valor_total = ?, activo = ?
             WHERE id = ?
-        """, (nombre, conductor_id, gasto_conductor, gasto_petroleo, valor_total, destino_id))
+        """, (nombre, conductor, gasto_conductor, gasto_petroleo, valor_total,activo, id))
         conn.commit()
 
 def cambiar_estado_destino(destino_id, nuevo_estado):
