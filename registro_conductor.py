@@ -18,7 +18,7 @@ def mostrar_registro_conductor():
     conductor_id = st.session_state["conductor_id"]
     conductor_nombre = st.session_state["conductor_nombre"]
 
-    destinos = obtener_destinos()
+    destinos = obtener_destinos(empresa_id)
     estados = obtener_estados()
 
     destinos_conductor = [d for d in destinos if d["conductor"] == conductor_id]
