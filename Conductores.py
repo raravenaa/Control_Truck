@@ -8,7 +8,6 @@ from db import (
 )
 from utils import formato_clp
 
-
 def mostrar_conductores():
     st.header("🧑‍✈️ Gestión de Conductores")
 
@@ -18,10 +17,24 @@ def mostrar_conductores():
     df_original = pd.DataFrame(conductores, columns=columnas)
     df_original["Sueldo Base"] = df_original["Sueldo Base"].apply(formato_clp)
 
+    # Mapeo visual para el estado
+    estado_display = {1: "🟢 Activado", 0: "🔴 Desactivado"}
+    estado_reverse = {"🟢 Activado": 1, "🔴 Desactivado": 0}
+
+    # Convertimos los valores de Activo a etiquetas visuales
+    df_original["Activo"] = df_original["Activo"].map(estado_display)
 
     st.subheader("📋 Lista de Conductores Activos")
     edited_df = st.data_editor(
         df_original,
+        column_config={
+            "Activo": st.column_config.SelectboxColumn(
+                label="Estado",
+                help="Estado del conductor",
+                options=["🟢 Activado", "🔴 Desactivado"],
+                required=True
+            )
+        },
         disabled=["ID", "RUT"],
         use_container_width=True,
         hide_index=True,
@@ -41,7 +54,7 @@ def mostrar_conductores():
                 telefono=row["Telefono"],
                 correo=row["Correo"],
                 sueldo_base=row["Sueldo Base"],
-                activo=row["Activo"]
+                activo=estado_reverse[row["Activo"]]  # Convertimos de etiqueta visual a valor real
             )
             st.success(f"✅ Conductor '{row['Nombre']}' actualizado correctamente.")
             st.rerun()
@@ -87,5 +100,3 @@ def mostrar_conductores():
                         st.success("✅ Conductor agregado correctamente.")
                         st.session_state.limpiar_campos = True
                         st.rerun()
-
-

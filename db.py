@@ -1,6 +1,7 @@
 # db.py
 import sqlite3
 from pathlib import Path
+from werkzeug.security import generate_password_hash, check_password_hash
 
 DB_PATH = Path("data/flota.db")
 
@@ -60,12 +61,13 @@ def deshabilitar_conductor(conductor_id):
 
 
 # === DESTINOS ===
-def obtener_destinos():
+def obtener_destinos(empresa_id):
     with conexion() as conn:
         return conn.execute("""
             SELECT id, nombre, gasto_conductor, gasto_petroleo, valor_total, conductor
             FROM destinos
-        """).fetchall()
+            where empresa = ?
+        """,(empresa_id,)).fetchall()
 
 def obtener_destinos_completos(empresa_id):
     with conexion() as conn:
@@ -178,3 +180,38 @@ def obtener_registros_rutas(empresa_id, fecha_inicio=None, fecha_fin=None):
                 WHERE r.empresa_id = ?
                 ORDER BY r.fecha DESC
             """, (empresa_id,)).fetchall()
+
+# === USUARIOS ===
+def crear_usuario(username, password, rol, conductor_id=None):
+    """Crea un nuevo usuario con su nombre de usuario, contraseña y rol (admin o conductor)."""
+    with conexion() as conn:
+        password_hash = generate_password_hash(password)  # Hasheamos la contraseña
+        conn.execute("""
+            INSERT INTO usuarios (username, password_hash, rol, conductor_id)
+            VALUES (?, ?, ?, ?)
+        """, (username, password_hash, rol, conductor_id))
+        conn.commit()
+
+def obtener_usuario_por_username(username):
+    """Obtiene un usuario por su nombre de usuario."""
+    with conexion() as conn:
+        return conn.execute("""
+            SELECT * FROM usuarios WHERE username = ?
+        """, (username,)).fetchone()
+
+def autenticar_usuario(username, password):
+    """Verifica que el nombre de usuario y la contraseña sean correctos."""
+    usuario = obtener_usuario_por_username(username)
+    if usuario and check_password_hash(usuario["password_hash"], password):
+        return usuario  # Usuario autenticado
+    return None
+
+def obtener_rol_usuario(username):
+    """Obtiene el rol de un usuario (admin o conductor)."""
+    usuario = obtener_usuario_por_username(username)
+    return usuario["rol"] if usuario else None
+
+def obtener_conductor_id_por_usuario(username):
+    """Obtiene el ID del conductor asociado a un usuario."""
+    usuario = obtener_usuario_por_username(username)
+    return usuario["conductor_id"] if usuario else None

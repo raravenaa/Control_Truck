@@ -14,7 +14,7 @@ def mostrar_ingreso():
     st.header("🚛 Registro de Ruta")
 
     empresa_id = st.session_state["empresa_id"]
-    destinos = obtener_destinos()
+    destinos = obtener_destinos(empresa_id)
     estados = obtener_estados()
     conductores = obtener_conductores_por_empresa(empresa_id)
     conductores_activos = [c for c in conductores if c["activo"]]

@@ -22,11 +22,7 @@ def calcular_quincena_actual():
         fin = (hoy + relativedelta(months=1)).replace(day=1) - timedelta(days=1)
     return inicio.date(), fin.date()
 
-
 def parsear_clp(valor):
-    """
-    Convierte un string con formato CLP como '$650.000' en un float: 650000.0
-    """
     if not valor:
         return 0.0
     if isinstance(valor, str):
@@ -36,17 +32,12 @@ def parsear_clp(valor):
             return 0.0
     return float(valor)
 
-
 def formatear_clp(valor):
-    """
-    Convierte un número a formato CLP: 650000 -> $650.000
-    """
     try:
         valor = float(valor)
         return "${:,.0f}".format(valor).replace(",", ".")
     except:
         return "$0"
-
 
 def resumen_por_conductor():
     st.header("📊 Resumen por Conductor")
@@ -77,6 +68,13 @@ def resumen_por_conductor():
     if df.empty:
         st.info("No hay registros en este rango de fechas.")
         return
+
+    # Filtro dinámico por nombre de conductor
+    nombres_unicos = df["nombre_conductor"].dropna().unique()
+    nombre_seleccionado = st.selectbox("Filtrar por Conductor", ["Todos"] + sorted(nombres_unicos.tolist()))
+
+    if nombre_seleccionado != "Todos":
+        df = df[df["nombre_conductor"] == nombre_seleccionado]
 
     resumen = []
     for conductor_id, data in df.groupby("conductor_id"):
@@ -189,5 +187,3 @@ def resumen_general():
         color_discrete_sequence=px.colors.sequential.algae
     )
     st.plotly_chart(fig, use_container_width=True)
-
-

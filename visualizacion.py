@@ -17,8 +17,8 @@ def mostrar_visualizacion():
     empresa_id = st.session_state["empresa_id"]
     registros = obtener_registros_por_empresa(empresa_id)
     df = pd.DataFrame(registros, columns=[
-        "ID", "Fecha", "N° Control", "N° Guía", "Destino","conductor",
-        "Gasto Conductor", "Gasto Petróleo", "Valor Total", "Estado"
+        "ID", "Fecha", "N° Control", "N° Guía", "Destino",
+        "Gasto Conductor", "Gasto Petróleo", "Valor Total","conductor", "Estado"
     ])
 
     if estado_filtro != "Todos":
